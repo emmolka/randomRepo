@@ -1,8 +1,8 @@
 import React from "react";
-import Login from "./Login";
+import Login from "./Components/Login";
 import "./App.css";
 import { BrowserRouter } from "react-router-dom";
-import Main from "./Main";
+import Main from "./Components/Main";
 import { Route, Redirect } from "react-router";
 
 const checkLogIn = () => !!window.localStorage.getItem("token");
@@ -10,8 +10,6 @@ const checkLogIn = () => !!window.localStorage.getItem("token");
 function App() {
   let isLoggedIn = checkLogIn();
 
-  console.log(isLoggedIn);
-  // this is a test
   return (
     <BrowserRouter>
       <Route

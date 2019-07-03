@@ -1,10 +1,11 @@
-const newId = e => {
+const newItemId = e => {
   const uuidv1 = require("uuid/v1");
   const numbers = uuidv1();
   console.log(e);
+
   e.setState({
-    newShipmentId: numbers
+    newItemId: numbers
   });
 };
 
-export default newId;
+export default newItemId;

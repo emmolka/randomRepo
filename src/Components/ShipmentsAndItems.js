@@ -1,15 +1,18 @@
 import React from "react";
-import Shipment from "./Shipment";
+import Shipment from "./DummyComponents/Shipment";
 //import Charts from "./Charts";
-import ShipmentCard from "./ShipmentCard";
+import ShipmentCard from "./DummyComponents/ShipmentCard";
 import axios from "axios";
-import Item from "./Item";
-import NewShipmentCard from "./NewShipmentCard";
-import NewShipmentInput from "./NewShipmentInput";
-
-class Menu extends React.Component {
+import Item from "./DummyComponents/Item";
+import NewShipmentCard from "./DummyComponents/NewShipmentCard";
+import NewShipmentInput from "./DummyComponents/NewShipmentInput";
+import newShipmentId from "../Modules/newShipmentId";
+import newItemId from "../Modules/newItemId";
+import clearItemInput from "../Modules/clearItemInput";
+import clearShipmentInput from "../Modules/clearShipmentInput";
+class ShipmentsAndItems extends React.Component {
   state = {
-    shipments: [], //shipment name shouldbethere
+    shipments: [],
     openedShipmentId: "",
     openedShipmentName: "",
     isNewShipmentOpen: false,
@@ -51,9 +54,23 @@ class Menu extends React.Component {
     }
   };
   //Adding and deleting shipments functions
+
+  //function that adds input value from a add shipment section
   addNewShipmentName = e => {
     this.setState({ newShipmentName: e.target.value });
   };
+
+  //After adding a shipment it shows a newly added shipment
+  hideAddNewShipment = () => {
+    this.setState({
+      isNewShipmentOpen: false,
+      isShipmentOpen: true,
+      openedShipmentId: this.state.newShipmentId,
+      openedShipmentName: this.state.newShipmentName
+    });
+  };
+
+  //adding shipment
   addNewShipment = async event => {
     try {
       await axios.post(
@@ -69,8 +86,9 @@ class Menu extends React.Component {
         }
       );
       this.addNewShipmentToState();
-      this.clearInput();
-      this.newShipmentId();
+      this.hideAddNewShipment(this.state);
+      clearShipmentInput(this);
+      newShipmentId(this);
     } catch (e) {
       alert("Adding shipment failed");
     }
@@ -88,6 +106,7 @@ class Menu extends React.Component {
       shipments: newArray
     });
   };
+  //deteting shipment
   deleteShipment = async event => {
     const shipmentId = this.state.openedShipmentId;
     try {
@@ -112,25 +131,11 @@ class Menu extends React.Component {
       shipments: newArray
     });
   };
-  clearInput = () => {
-    this.setState({
-      newShipmentName: "",
-      newItemName: ""
-    });
-  };
-
-  newShipmentId = () => {
-    const uuidv1 = require("uuid/v1");
-    const numbers = uuidv1();
-
-    this.setState({
-      newShipmentId: numbers
-    });
-  };
-
+  //function that adds input value from a add item section
   addNewItemName = e => {
     this.setState({ newItemName: e.target.value });
   };
+  //adding Item
   addItem = async event => {
     try {
       await axios.post(
@@ -148,19 +153,19 @@ class Menu extends React.Component {
         }
       );
       this.addItemToState();
-      this.newItemId();
-      this.clearInput();
+      newItemId(this);
+      clearItemInput(this);
     } catch (e) {
       alert(e);
     }
   };
+
   addItemToState = () => {
     const item = {
       id: this.state.newItemId,
       code: this.state.newItemName,
       shipment_id: this.state.openedShipmentId
     };
-
     const currentArray = [...this.state.shipments];
     const newArray = currentArray;
     newArray.map(shipment => {
@@ -172,6 +177,7 @@ class Menu extends React.Component {
       shipments: newArray
     });
   };
+  //deteting item
   deleteItem = async e => {
     try {
       await axios.delete(`https://api.shipments.test-y-sbm.com/item/${e.id}`, {
@@ -203,18 +209,10 @@ class Menu extends React.Component {
     });
     this.setState({ shipments: newArray });
   };
-  newItemId = () => {
-    const uuidv1 = require("uuid/v1");
-    const numbers = uuidv1();
-
-    this.setState({
-      newItemId: numbers
-    });
-  };
-
+  //downloading all shipments
   async componentDidMount() {
-    this.newShipmentId();
-    this.newItemId();
+    newShipmentId(this);
+    newItemId(this);
     try {
       const data = await axios.get(
         `https://api.shipments.test-y-sbm.com/shipment`,
@@ -229,19 +227,19 @@ class Menu extends React.Component {
         shipments: list
       });
     } catch (e) {
-      alert("Faild to load Shipments");
+      alert("Failed to load Shipments");
+      this.props.props.history.push("/login");
+      localStorage.clear();
     }
   }
   render() {
     return (
       <>
-        {/* <div className="content-wrapper" style={{ minHeight: "901px" }}> */}
         <aside className="main-sidebar">
-          {/* sidebar: style can be found in sidebar.less */}
           <section className="sidebar">
-            >{/* sidebar menu: : style can be found in sidebar.less */}
             <ul className="sidebar-menu" data-widget="tree">
               <li className="header">LIST OF SHIPMENTS</li>
+              {/* displaying shipments  */}
               <NewShipmentCard onClick={this.showNewShipment} />
               {this.state.shipments.map(shipment => (
                 <ShipmentCard
@@ -257,9 +255,8 @@ class Menu extends React.Component {
               {/* <Charts /> */}
             </ul>
           </section>
-
-          {/* /.sidebar */}
         </aside>
+        {/* displaying items  */}
         <div className="content-wrapper" style={{ minHeight: "901px" }}>
           {this.state.shipments.map(shipment => {
             if (
@@ -298,10 +295,9 @@ class Menu extends React.Component {
             />
           )}
         </div>
-        {/* </div> */}
       </>
     );
   }
 }
 
-export default Menu;
+export default ShipmentsAndItems;
